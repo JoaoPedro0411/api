@@ -9,7 +9,6 @@ router.post("/login", (req, res, next) => {
     if (err || !user) {
       return res.status(400).json({ message: "Erro na autenticação", ...info });
     }
-
     const token = jwt.sign({ userId: user.userId }, SECRET_KEY, { expiresIn: "1h" });
     return res.status(200).json({
       token,

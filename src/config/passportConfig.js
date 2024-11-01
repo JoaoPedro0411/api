@@ -1,5 +1,5 @@
 const passport = require("passport");
-const jwt = require('jsonwebtoken')
+const jwt = require("jsonwebtoken");
 const LocalStrategy = require("passport-local");
 const GitHubStrategy = require("passport-github2").Strategy;
 const bcrypt = require("bcrypt");
@@ -12,6 +12,7 @@ passport.use(
       usernameField: "userEmail",
       passwordField: "userPassword",
     },
+
     async (userEmail, userPassword, done) => {
       try {
         const user = await User.findOne({ where: { userEmail } });
@@ -50,6 +51,7 @@ passport.use(
             )
           );
         }
+
         let user = await User.findOne({ where: { userEmail } });
         if (!user) {
           user = await User.create({
@@ -59,28 +61,12 @@ passport.use(
           });
         }
 
-        const token = jwt.sign({ id: user.userId }, process.env.JWT_SECRET, {
-          expiresIn: "1h",
-        });
-
-        return done(null, { user, token });
+        return done(null, { user });
       } catch (error) {
         return done(error);
       }
     }
   )
 );
-passport.serializeUser((user, done) => {
-  done(null, user.userId);
-});
-
-passport.deserializeUser(async (id, done) => {
-  try {
-    const user = await User.findByPk(id);
-    done(null, user);
-  } catch (error) {
-    done(error, null);
-  }
-});
 
 module.exports = passport;
