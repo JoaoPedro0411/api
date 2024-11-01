@@ -32,11 +32,11 @@ class AuthServices {
       const token = jwt.sign({ userId: user.userId }, SECRET_KEY, {
         expiresIn: "1h",
       });
-
-      return res.status(200).json({
-        token,
-        message: "Autenticação com GitHub realizada com sucesso!",
-      });
+      res.redirect(`myapp://auth?token=${token}`);
+      // return res.status(200).json({
+      //   token,
+      //   message: "Autenticação com GitHub realizada com sucesso!",
+      // });
     })(req, res, next); 
 }
 }
