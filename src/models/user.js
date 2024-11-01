@@ -27,7 +27,7 @@ User.init(
     },
     userBalance: {
       type: DataTypes.DECIMAL,
-      allowNull: true,
+      allowNull: false,
       field: "user_balance",
     },
     userPassword:{
