@@ -27,7 +27,7 @@ User.init(
     },
     userBalance: {
       type: DataTypes.DECIMAL,
-      allowNull: false,
+      allowNull: true, //mudar depois para adicionar saldo R$0,00
       field: "user_balance",
     },
     userPassword:{

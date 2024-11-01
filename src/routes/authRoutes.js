@@ -1,7 +1,7 @@
 const express = require("express");
 const passport = require("passport");
 const router = express.Router();
-const AuthServices = require("../services/authServices");
+const AuthServices = require('../services/authServices')
 
 router.post("/login", (req, res, next) => {
   AuthServices.localLogin(req, res, next);
@@ -13,7 +13,7 @@ router.get(
 );
 
 router.get("/github/callback", (req, res, next) => {
-  AuthServices.gitHubCallBack(req, res, next);
+  AuthServices.gitHubCallback(req, res, next);
 });
 
 module.exports = router;
