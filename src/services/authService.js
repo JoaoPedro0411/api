@@ -1,69 +1,61 @@
 const passport = require("passport");
 const jwt = require("jsonwebtoken");
 const SECRET_KEY = process.env.JWT_SECRET;
-
 class AuthServices {
-  localLogin = (req, res, next) => {
-    passport.authenticate("local", (err, user, info) => {
-      if (err) {
-        return next(err);
-      }
 
-      if (!user) {
-        return res.status(401).json({ error: "Usuário ou senha incorretos" });
-      }
+  async localLogin(req) {
+    return new Promise((resolve, reject) => {
+      passport.authenticate("local", (err, user, info) => {
+        if (err) {
+          return reject(err);
+        }
 
-      const token = jwt.sign({ userId: user.userId }, SECRET_KEY, {
-        expiresIn: "1h",
-      });
+        if (!user) {
+          return reject(new Error("Usuário ou senha incorretos"));
+        }
 
-      const userData = {
-        userId: user.userId,
-        userName: user.userName,
-        userEmail: user.userEmail,
-        userToken: token,
-      };
+        const token = jwt.sign({ userId: user.userId }, SECRET_KEY, {
+          expiresIn: "1h",
+        });
 
-      return res.status(200).json(userData);
-    })(req, res, next);
-  };
+        const userData = {
+          userId: user.userId,
+          userName: user.userName,
+          userEmail: user.userEmail,
+          userToken: token,
+        };
 
-  gitHubCallback = (req, res, next) => {
-    passport.authenticate("github", (err, user, info) => {
-      if (err) {
-        return next(err);
-      }
+        resolve(userData);
+      })(req);
+    });
+  }
 
-      if (!user) {
-        return res.status(401).json({ message: "Autenticação falhou" });
-      }
-      const token = jwt.sign({ userId: user.userId }, SECRET_KEY, {
-        expiresIn: "1h",
-      });
+  async gitHubCallback(req) {
+    return new Promise((resolve, reject) => {
+      passport.authenticate("github", (err, user, info) => {
+        if (err) {
+          return reject(err);
+        }
 
-      const userData = {
-        userId: user.userId,
-        userName: user.userName,
-        userEmail: user.userEmail,
-        userToken: token,
-      };
+        if (!user) {
+          return reject(new Error("Autenticação falhou"));
+        }
 
-      return res.send(`
-        <script>
-          const data = ${JSON.stringify(userData)};
-          window.ReactNativeWebView.postMessage(JSON.stringify(data));
-        </script>
-      `);
-    })(req, res, next);
-  };
+        const token = jwt.sign({ userId: user.userId }, SECRET_KEY, {
+          expiresIn: "1h",
+        });
 
-  githubLogin = (req, res, next) => {
-    passport.authenticate("github", { scope: ["user:email"], prompt: "login" })(
-      req,
-      res,
-      next
-    );
-  };
+        const userData = {
+          userId: user.userId,
+          userName: user.userName,
+          userEmail: user.userEmail,
+          userToken: token,
+        };
+
+        resolve(userData);
+      })(req);
+    });
+  }
 }
 
 module.exports = new AuthServices();
