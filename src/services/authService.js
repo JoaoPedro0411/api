@@ -2,7 +2,6 @@ const passport = require("passport");
 const jwt = require("jsonwebtoken");
 const SECRET_KEY = process.env.JWT_SECRET;
 class AuthServices {
-
   async localLogin(req) {
     return new Promise((resolve, reject) => {
       passport.authenticate("local", (err, user, info) => {
@@ -28,6 +27,13 @@ class AuthServices {
         resolve(userData);
       })(req);
     });
+  }
+  githubLogin(req, res, next) {
+    passport.authenticate("github", { scope: ["user:email"], prompt: "login" })(
+      req,
+      res,
+      next
+    );
   }
 
   async gitHubCallback(req) {
