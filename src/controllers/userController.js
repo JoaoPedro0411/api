@@ -12,7 +12,45 @@ class UserController {
       const newUser = await UserService.createUser(req.body);
       return res.status(201).json(newUser);
     } catch (error) {
+      console.error("Erro ao criar usuário:", error.message);
       return res.status(500).json({ error: "Erro ao criar usuário" });
+    }
+  }
+
+  async getUser(req, res) {
+    const { userId } = req.params;
+
+    try {
+      const user = await UserService.getUserById(userId);
+      return res.status(200).json(user);
+    } catch (error) {
+      console.error("Erro ao buscar usuário:", error.message);
+      return res.status(404).json({ error: "Usuário não encontrado" });
+    }
+  }
+
+  async updateUser(req, res) {
+    const { userId } = req.params;
+    const data = req.body;
+
+    try {
+      const updatedUser = await UserService.updateUser(userId, data);
+      return res.status(200).json(updatedUser);
+    } catch (error) {
+      console.error("Erro ao atualizar usuário:", error.message);
+      return res.status(500).json({ error: "Erro ao atualizar usuário" });
+    }
+  }
+
+  async deleteUser(req, res) {
+    const { userId } = req.params;
+
+    try {
+      await UserService.deleteUser(userId);
+      return res.status(204).send();
+    } catch (error) {
+      console.error("Erro ao deletar usuário:", error.message);
+      return res.status(500).json({ error: "Erro ao deletar usuário" });
     }
   }
 

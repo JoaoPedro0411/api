@@ -1,4 +1,3 @@
-const { Error } = require("sequelize");
 const { sequelize } = require("../config/db-config");
 const bcrypt = require("bcrypt");
 const User = require("../models/user");
