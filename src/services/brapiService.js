@@ -14,9 +14,9 @@ class BrapiService {
     });
   }
 
-  async getAsset(tickers) {
+  async getAsset(ticker) {
     try {
-      const response = await this.brapi.get(`/quote/${tickers}`);
+      const response = await this.brapi.get(`/quote/${ticker}`);
       if (!response.data) {
         throw new Error("Nenhum dado encontrado na resposta da API.");
       }
@@ -56,6 +56,41 @@ class BrapiService {
       throw new Error(`Erro ao buscar lista de ativos: ${error.message}`);
     }
   }
+  
+  async getAssetsWithChange(type, limit) {
+    try {
+      const assetsList = await this.getAssets(type, limit);
+      const detailedAssets = [];
+
+
+      for (const asset of assetsList) {
+        const ticker = asset.stock;
+        const detailedData = await this.getAsset(ticker);
+
+        const priceChange =
+          ((detailedData.regularMarketPrice - detailedData.regularMarketPreviousClose) /
+            detailedData.regularMarketPreviousClose) *
+          100;
+
+        const assetWithChange = {
+          symbol: detailedData.symbol,
+          shortName: detailedData.shortName,
+          regularMarketPrice: detailedData.regularMarketPrice,
+          previousClose: detailedData.regularMarketPreviousClose,
+          priceChangePercent: priceChange.toFixed(2),
+          logoUrl: detailedData.logoUrl,
+        };
+
+        detailedAssets.push(assetWithChange);
+      }
+
+      return detailedAssets;
+    } catch (error) {
+      console.error("Erro ao obter ativos com variação de preço:", error.message);
+      throw new Error("Erro ao obter ativos com variação de preço");
+    }
+  }
 }
+
 
 module.exports = new BrapiService();

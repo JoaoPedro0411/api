@@ -4,7 +4,7 @@ const cors = require("cors");
 const { init, connect } = require("./src/config/db-config.js");
 const userRoutes = require("./src/routes/userRoutes.js");
 const authRoutes = require("./src/routes/authRoutes.js");
-const brapiRoutes = require("./src/routes/brapiRoutes.js");
+const portfolioRoutes = require("./src/routes/portfolioRoutes.js")
 const passport = require("./src/config/passportConfig.js");
 const PORT = process.env.SERVER_PORT;
 const app = express();
@@ -14,7 +14,8 @@ app.use(express.json());
 app.use(passport.initialize());
 app.use("/users", userRoutes);
 app.use("/auth", authRoutes);
-app.use("/brapi", brapiRoutes);
+app.use("portifolio", portfolioRoutes);
+
 
 connect()
   .then(() => {

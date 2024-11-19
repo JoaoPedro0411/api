@@ -6,10 +6,10 @@ class Transaction extends Model {}
 
 Transaction.init(
   {
-    transactionAssetId: {
+    transactionAssetTicker: {
       type: DataTypes.STRING,
       allowNull: false,
-      field: "transaction_asset_id",
+      field: "transaction_asset_ticker",
     },
     transactionId: {
       type: DataTypes.INTEGER,
@@ -46,10 +46,11 @@ Transaction.init(
       allowNull: false,
       field: "transaction_asset_quantity",
     },
-    transactionLotId: {
-      type: DataTypes.STRING,
-      allowNull: false, 
-      field: "transaction_lot_id",
+    isActive: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: true,
+      field: "is_active",
     },
   },
   {

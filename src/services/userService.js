@@ -5,9 +5,7 @@ const User = require("../models/user");
 const jwt = require("jsonwebtoken");
 const SECRET_KEY = process.env.JWT_SECRET;
 
-
 class UserService {
-
   async createUser(data) {
     const transaction = await sequelize.transaction();
 
@@ -20,7 +18,6 @@ class UserService {
       }
 
       const hashedPassword = await bcrypt.hash(userPassword, 10);
-
       const token = jwt.sign({ userEmail }, SECRET_KEY, { expiresIn: "1h" });
 
       const newUser = await User.create(
@@ -28,12 +25,12 @@ class UserService {
           userName,
           userEmail,
           userPassword: hashedPassword,
+          userBalance: 0,
         },
         { transaction }
       );
 
       await transaction.commit();
-
       return { user: newUser, token };
     } catch (error) {
       await transaction.rollback();
@@ -46,12 +43,11 @@ class UserService {
     try {
       const user = await User.findByPk(id);
       if (!user) {
-        throw new Error("Usuario não encontrado");
+        throw new Error("Usuário não encontrado");
       }
       return user;
     } catch (error) {
-      console.error(`Erro buscar usuario pelo ID: ${error.message}`);
-
+      console.error(`Erro ao buscar usuário pelo ID: ${error.message}`);
       throw error;
     }
   }
@@ -60,12 +56,12 @@ class UserService {
     try {
       const user = await User.findByPk(id);
       if (!user) {
-        throw new Error("Usuario não encontrado");
+        throw new Error("Usuário não encontrado");
       }
       await user.update(data);
       return user;
     } catch (error) {
-      console.error(`Erro ao atualizar usuario: ${error.message}`);
+      console.error(`Erro ao atualizar usuário: ${error.message}`);
       throw error;
     }
   }
@@ -74,11 +70,44 @@ class UserService {
     try {
       const user = await User.findByPk(id);
       if (!user) {
-        throw new Error("Usuario não encontrado");
+        throw new Error("Usuário não encontrado");
       }
-      await User.destroy({ where: { id } });
+      await User.destroy({ where: { userId: id } });
     } catch (error) {
-      console.error(`Erro ao atualizar usuario: ${error.message}`);
+      console.error(`Erro ao deletar usuário: ${error.message}`);
+      throw error;
+    }
+  }
+
+  async deposit(userId, amount) {
+    try {
+      const user = await User.findByPk(userId);
+      if (!user) {
+        throw new Error("Usuário não encontrado");
+      }
+      const newBalance = user.userBalance + amount;
+      await user.update({ userBalance: newBalance });
+      return { userId, newBalance };
+    } catch (error) {
+      console.error("Erro ao adicionar saldo:", error.message);
+      throw error;
+    }
+  }
+
+  async withdraw(userId, amount) {
+    try {
+      const user = await User.findByPk(userId);
+      if (!user) {
+        throw new Error("Usuário não encontrado");
+      }
+      if (user.userBalance < amount) {
+        throw new Error("Saldo insuficiente");
+      }
+      const newBalance = user.userBalance - amount;
+      await user.update({ userBalance: newBalance });
+      return { userId, newBalance };
+    } catch (error) {
+      console.error("Erro ao remover saldo:", error.message);
       throw error;
     }
   }
