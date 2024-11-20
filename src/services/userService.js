@@ -44,7 +44,12 @@ class UserService {
       if (!user) {
         throw new Error("Usuário não encontrado");
       }
-      return user;
+      userData = {
+        userName: user.userName,
+        userBalance: user.userBalance, 
+        userEmail: user.userEmail
+      }
+      return userData
     } catch (error) {
       console.error(`Erro ao buscar usuário pelo ID: ${error.message}`);
       throw error;
