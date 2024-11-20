@@ -40,16 +40,16 @@ class UserService {
 
   async getUserById(id) {
     try {
-      const user = await User.findByPk(id);
-      if (!user) {
+      const userData = await User.findByPk(id);
+      if (!userData) {
         throw new Error("Usuário não encontrado");
       }
-      userData = {
-        userName: user.userName,
-        userBalance: user.userBalance, 
-        userEmail: user.userEmail
-      }
-      return userData
+      const user = {
+        userName: userData.userName,
+        userBalance: userData.userBalance,
+        userEmail: userData.userEmail,
+      };
+      return user;
     } catch (error) {
       console.error(`Erro ao buscar usuário pelo ID: ${error.message}`);
       throw error;
