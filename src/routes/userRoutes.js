@@ -1,6 +1,7 @@
 const express = require("express");
 const { body, param, validationResult } = require("express-validator");
 const UserController = require("../controllers/userController");
+const authenticateJWT = require("../middlewares/authMiddleware");
 
 const router = express.Router();
 
@@ -14,6 +15,7 @@ const handleValidationErrors = (req, res, next) => {
 
 router.post(
   "/register",
+  authenticateJWT,
   [
     body("userName")
       .isString()
@@ -30,6 +32,7 @@ router.post(
 
 router.get(
   "/:userId",
+  authenticateJWT,
   [param("userId").isInt().withMessage("ID deve ser um número inteiro")],
   handleValidationErrors,
   UserController.getUser
@@ -37,6 +40,7 @@ router.get(
 
 router.put(
   "/:userId",
+  authenticateJWT,
   [param("userId").isInt()],
   handleValidationErrors,
   UserController.updateUser
@@ -44,6 +48,7 @@ router.put(
 
 router.delete(
   "/:userId",
+  authenticateJWT,
   [param("userId").isInt()],
   handleValidationErrors,
   UserController.deleteUser
@@ -51,6 +56,7 @@ router.delete(
 
 router.post(
   "/:userId/deposit",
+  authenticateJWT,
   [param("userId").isInt()],
   handleValidationErrors,
   UserController.deposit
@@ -58,6 +64,8 @@ router.post(
 
 router.post(
   "/:userId/withdraw",
+  authenticateJWT,
+
   [param("userId").isInt()],
   handleValidationErrors,
   UserController.withdraw
