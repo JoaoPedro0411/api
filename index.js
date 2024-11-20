@@ -14,7 +14,7 @@ app.use(express.json());
 app.use(passport.initialize());
 app.use("/users", userRoutes);
 app.use("/auth", authRoutes);
-app.use("portifolio", portfolioRoutes);
+app.use("/portfolio", portfolioRoutes);
 
 
 connect()
