@@ -80,6 +80,18 @@ class PortfolioController {
       return res.status(500).json({ error: "Erro ao obter ativos do usuário com variação de preço" });
     }
   }
+
+  async getDetailedAssets(req, res) {
+    const { type, limit } = req.query;
+
+    try {
+      const assets = await PortfolioService.getDetailedAssets(type, limit);
+      return res.status(200).json(assets);
+    } catch (error) {
+      console.error("Erro ao obter ativos detalhados:", error.message);
+      return res.status(500).json({ error: "Erro ao obter ativos detalhados" });
+    }
+  }
 }
 
 module.exports = new PortfolioController();
