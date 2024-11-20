@@ -49,7 +49,7 @@ class BrapiService {
       if (!response.data) {
         throw new Error("(getAssets - brapiService): Nenhum dado encontrado na resposta da API.");
       }
-      const data = response.data;
+      const data = response.data.stocks;
       return data;
     } catch (error) {
       console.error("(getAssets - brapiService): Erro ao buscar lista de ativos:", error.message);
