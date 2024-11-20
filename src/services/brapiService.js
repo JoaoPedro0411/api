@@ -18,7 +18,7 @@ class BrapiService {
     try {
       const response = await this.brapi.get(`/quote/${ticker}`);
       if (!response.data) {
-        throw new Error("Nenhum dado encontrado na resposta da API.");
+        throw new Error("(getAsset - brapiService): Nenhum dado encontrado na resposta da API.");
       }
       const data = response.data;
 
@@ -36,8 +36,8 @@ class BrapiService {
       console.log(assetData);
       return assetData;
     } catch (error) {
-      console.error("Erro ao buscar lista de ativos:", error.message);
-      throw new Error(`Erro ao buscar lista de ativos: ${error.message}`);
+      console.error("(getAssets- brapiService): Erro ao buscar lista de ativos:", error.message);
+      throw new Error(`(getAsset - brapiService): Erro ao buscar lista de ativos: ${error.message}`);
     }
   }
 
@@ -47,13 +47,13 @@ class BrapiService {
         `quote/list?type=${type}&limit=${limit}`
       );
       if (!response.data) {
-        throw new Error("Nenhum dado encontrado na resposta da API.");
+        throw new Error("(getAssets - brapiService): Nenhum dado encontrado na resposta da API.");
       }
       const data = response.data;
       return data;
     } catch (error) {
-      console.error("Erro ao buscar lista de ativos:", error.message);
-      throw new Error(`Erro ao buscar lista de ativos: ${error.message}`);
+      console.error("(getAssets - brapiService): Erro ao buscar lista de ativos:", error.message);
+      throw new Error(`(getAssets - brapiService): Erro ao buscar lista de ativos: ${error.message}`);
     }
   }
   
@@ -86,8 +86,8 @@ class BrapiService {
 
       return detailedAssets;
     } catch (error) {
-      console.error("Erro ao obter ativos com variação de preço:", error.message);
-      throw new Error("Erro ao obter ativos com variação de preço");
+      console.error("(getAssetsWithChange - brapiService): Erro ao obter ativos com variação de preço:", error.message);
+      throw new Error("(getAssetsWithChange - brapiService): Erro ao obter ativos com variação de preço");
     }
   }
 }

@@ -12,8 +12,8 @@ class PortfolioController {
         asset,
       });
     } catch (error) {
-      console.error("Erro ao comprar ações:", error.message);
-      return res.status(500).json({ error: "Erro ao processar compra de ações" });
+      console.error("(buyStock - portfolioController BackEnd): Erro ao comprar ações:", error.message);
+      return res.status(500).json({ error: "(buyStock - portfolioController BackEnd): Erro ao processar compra de ações" });
     }
   }
 
@@ -28,8 +28,8 @@ class PortfolioController {
         totalCost,
       });
     } catch (error) {
-      console.error("Erro ao vender ações:", error.message);
-      return res.status(500).json({ error: "Erro ao processar venda de ações" });
+      console.error("(sellStock - portfolioController BackEnd): Erro ao vender ações:", error.message);
+      return res.status(500).json({ error: "(sellStock - portfolioController BackEnd): Erro ao processar venda de ações" });
     }
   }
 
@@ -40,7 +40,7 @@ class PortfolioController {
       const portfolio = await PortfolioService.getUserAssetsWithChange(userId);
       return res.status(200).json(portfolio);
     } catch (error) {
-      console.error("Erro ao obter portfólio:", error.message);
+      console.error("(getPortfolio - portfolioController BackEnd): Erro ao obter portfólio:", error.message);
       return res.status(500).json({ error: "Erro ao obter portfólio" });
     }
   }
@@ -52,8 +52,8 @@ class PortfolioController {
       const history = await PortfolioService.getTransactionHistory(userId);
       return res.status(200).json(history);
     } catch (error) {
-      console.error("Erro ao obter histórico de transações:", error.message);
-      return res.status(500).json({ error: "Erro ao obter histórico de transações" });
+      console.error("(getTransactionHistory - portfolioController BackEnd): Erro ao obter histórico de transações:", error.message);
+      return res.status(500).json({ error: "(getTransactionHistory - portfolioController BackEnd): Erro ao obter histórico de transações" });
     }
   }
 
@@ -64,8 +64,8 @@ class PortfolioController {
       const result = await PortfolioService.calculateReturn(userId);
       return res.status(200).json(result);
     } catch (error) {
-      console.error("Erro ao calcular rentabilidade:", error.message);
-      return res.status(500).json({ error: "Erro ao calcular rentabilidade" });
+      console.error("(calculateReturn - portfolioController BackEnd): Erro ao calcular rentabilidade:", error.message);
+      return res.status(500).json({ error: "(calculateReturn - portfolioController BackEnd): Erro ao calcular rentabilidade" });
     }
   }
 
@@ -76,8 +76,8 @@ class PortfolioController {
       const assets = await PortfolioService.getUserAssetsWithChange(userId);
       return res.status(200).json(assets);
     } catch (error) {
-      console.error("Erro ao obter ativos do usuário com variação de preço:", error.message);
-      return res.status(500).json({ error: "Erro ao obter ativos do usuário com variação de preço" });
+      console.error("(getUserAssetsWithChange - portfolioController BackEnd): Erro ao obter ativos do usuário com variação de preço:", error.message);
+      return res.status(500).json({ error: "(getUserAssetsWithChange - portfolioController BackEnd): Erro ao obter ativos do usuário com variação de preço" });
     }
   }
 
@@ -88,8 +88,8 @@ class PortfolioController {
       const assets = await PortfolioService.getDetailedAssets(type, limit);
       return res.status(200).json(assets);
     } catch (error) {
-      console.error("Erro ao obter ativos detalhados:", error.message);
-      return res.status(500).json({ error: "Erro ao obter ativos detalhados" });
+      console.error("(getDetailedAssets - portfolioController BackEnd): Erro ao obter ativos detalhados:", error.message);
+      return res.status(500).json({ error: "(getDetailedAssets - portfolioController BackEnd): Erro ao obter ativos detalhados" });
     }
   }
 }

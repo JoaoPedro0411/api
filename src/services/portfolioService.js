@@ -42,8 +42,8 @@ class PortfolioService {
 
       return asset;
     } catch (error) {
-      console.error("Erro ao comprar ações:", error.message);
-      throw new Error("Erro ao processar compra de ações");
+      console.error("(buyStock - portfolioService BackEnd): Erro ao comprar ações:", error.message);
+      throw new Error("(buyStock - portfolioService BackEnd): Erro ao processar compra de ações");
     }
   }
 
@@ -81,7 +81,7 @@ class PortfolioService {
       }
 
       if (remainingQuantity > 0) {
-        throw new Error("Quantidade insuficiente para venda");
+        throw new Error("(sellStock - portfolioService BackEnd): Quantidade insuficiente para venda");
       }
 
       const asset = await UserAssets.findOne({
@@ -99,7 +99,7 @@ class PortfolioService {
 
       return totalCost;
     } catch (error) {
-      console.error("Erro ao vender ações usando FIFO:", error.message);
+      console.error("(sellStock - portfolioService BackEnd): Erro ao vender ações usando FIFO:", error.message);
       throw error;
     }
   }
@@ -112,8 +112,8 @@ class PortfolioService {
       });
       return transactions;
     } catch (error) {
-      console.error("Erro ao obter histórico de transações:", error.message);
-      throw new Error("Erro ao obter histórico de transações");
+      console.error("(getTransactionHistory - portfolioService BackEnd): Erro ao obter histórico de transações:", error.message);
+      throw new Error("(getTransactionHistory - portfolioService BackEnd): Erro ao obter histórico de transações");
     }
   }
 
@@ -138,8 +138,8 @@ class PortfolioService {
         ((totalValue - totalInvested) / totalInvested) * 100;
       return { totalInvested, totalValue, returnPercentage };
     } catch (error) {
-      console.error("Erro ao calcular rentabilidade:", error.message);
-      throw new Error("Erro ao calcular rentabilidade");
+      console.error(" (calculateReturn - portfolioService BackEnd): Erro ao calcular rentabilidade:", error.message);
+      throw new Error("(calculateReturn - portfolioService BackEnd): Erro ao calcular rentabilidade");
     }
   }
 
@@ -148,8 +148,8 @@ class PortfolioService {
       const assets = await brapiService.getAssetsWithChange(type, limit);
       return assets;
     } catch (error) {
-      console.error("Erro ao obter ativos detalhados:", error.message);
-      throw new Error("Erro ao obter ativos detalhados");
+      console.error("(getDetailedAssets - portfolioService BackEnd): Erro ao obter ativos detalhados:", error.message);
+      throw new Error("(getDetailedAssets - portfolioService BackEnd): Erro ao obter ativos detalhados");
     }
   }
   
@@ -158,7 +158,7 @@ class PortfolioService {
       const userAssets = await UserAssets.findAll({ where: { userId } });
 
       if (userAssets.length === 0) {
-        throw new Error("O usuário não possui ativos.");
+        throw new Error("(getUserAssetsWithChange - portfolioService BackEnd): O usuário não possui ativos.");
       }
 
       const assetsWithChange = [];
@@ -169,7 +169,7 @@ class PortfolioService {
         const assetDetails = await brapiService.getAsset(ticker);
 
         if (!assetDetails) {
-          console.error(`Dados não encontrados para o ativo ${ticker}`);
+          console.error(`(getUserAssetsWithChange - portfolioService BackEnd): Dados não encontrados para o ativo ${ticker}`);
           continue;
         }
         const currentPrice = assetDetails.regularMarketPrice;
@@ -195,10 +195,10 @@ class PortfolioService {
       return assetsWithChange;
     } catch (error) {
       console.error(
-        "Erro ao obter ativos do usuário com variação de preço:",
+        "(getUserAssetsWithChange - portfolioService BackEnd): Erro ao obter ativos do usuário com variação de preço:",
         error.message
       );
-      throw new Error("Erro ao obter ativos do usuário com variação de preço");
+      throw new Error("(getUserAssetsWithChange - portfolioService BackEnd): Erro ao obter ativos do usuário com variação de preço");
     }
   }
 
