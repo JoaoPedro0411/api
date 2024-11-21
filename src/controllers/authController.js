@@ -1,3 +1,4 @@
+const { verify } = require("jsonwebtoken");
 const authServices = require("../services/authService");
 
 class AuthController {
@@ -32,6 +33,5 @@ class AuthController {
     }
   }
 }
-
 
 module.exports = new AuthController();
