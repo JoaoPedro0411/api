@@ -6,12 +6,6 @@ class UserAssets extends Model {}
 
 UserAssets.init(
   {
-    assetId: {
-      type: DataTypes.INTEGER,
-      autoIncrement: true,
-      field: "asset_id",
-      primaryKey: true,
-    },
     assetTicker: {
       type: DataTypes.STRING,
       allowNull: false,
