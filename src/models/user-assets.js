@@ -12,7 +12,7 @@ UserAssets.init(
       field: "asset_id",
       primaryKey: true,
     },
-    assetTick: {
+    assetTicker: {
       type: DataTypes.STRING,
       allowNull: false,
       field: "asset_tick",
