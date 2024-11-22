@@ -1,5 +1,6 @@
 const UserAssets = require("../models/user-assets");
 const Transaction = require("../models/transaction");
+const brapiService = require("./brapiService");
 const User = require("../models/user");
 
 class PortfolioService {
@@ -164,6 +165,106 @@ class PortfolioService {
       );
       throw new Error(
         `(sellStock - PortfolioService): Erro ao processar venda de ações`
+      );
+    }
+  }
+  async calculateReturn(userId) {
+    try {
+      const assets = await UserAssets.findAll({ where: { userId } });
+
+      let totalInvested = 0;
+      let totalValue = 0;
+
+      for (const asset of assets) {
+        const currentPriceData = await brapiService.getAsset(asset.assetTicker);
+        const currentPrice = currentPriceData.regularMarketPrice;
+        const value = currentPrice * asset.assetTotalQuantity;
+        const invested = asset.averageAssetPrice * asset.assetTotalQuantity;
+
+        totalInvested += invested;
+        totalValue += value;
+      }
+
+      const returnPercentage =
+        ((totalValue - totalInvested) / totalInvested) * 100;
+      return { totalInvested, totalValue, returnPercentage };
+    } catch (error) {
+      console.error(
+        " (calculateReturn - portfolioService BackEnd): Erro ao calcular rentabilidade:",
+        error.message
+      );
+      throw new Error(
+        "(calculateReturn - portfolioService BackEnd): Erro ao calcular rentabilidade"
+      );
+    }
+  }
+
+  async getDetailedAssets(type, limit) {
+    try {
+      const assets = await brapiService.getAssetsWithChange(type, limit);
+      return assets;
+    } catch (error) {
+      console.error(
+        "(getDetailedAssets - portfolioService BackEnd): Erro ao obter ativos detalhados:",
+        error.message
+      );
+      throw new Error(
+        "(getDetailedAssets - portfolioService BackEnd): Erro ao obter ativos detalhados"
+      );
+    }
+  }
+
+  async getUserAssetsWithChange(userId) {
+    try {
+      const userAssets = await UserAssets.findAll({ where: { userId } });
+
+      if (userAssets.length === 0) {
+        throw new Error(
+          "(getUserAssetsWithChange - portfolioService BackEnd): O usuário não possui ativos."
+        );
+      }
+
+      const assetsWithChange = [];
+
+      for (const asset of userAssets) {
+        const ticker = asset.assetTicker;
+
+        const assetDetails = await brapiService.getAsset(ticker);
+
+        if (!assetDetails) {
+          console.error(
+            `(getUserAssetsWithChange - portfolioService BackEnd): Dados não encontrados para o ativo ${ticker}`
+          );
+          continue;
+        }
+        const currentPrice = assetDetails.regularMarketPrice;
+        const previousClose = assetDetails.regularMarketPreviousClose;
+        const priceChangePercent =
+          ((currentPrice - previousClose) / previousClose) * 100;
+
+        const assetData = {
+          ticker,
+          shortName: assetDetails.shortName,
+          longName: assetDetails.longName,
+          currentPrice,
+          previousClose,
+          priceChangePercent: priceChangePercent.toFixed(2),
+          logoUrl: assetDetails.logoUrl,
+          quantity: asset.assetTotalQuantity,
+          averagePrice: asset.averageAssetPrice,
+        };
+
+        assetsWithChange.push(assetData);
+      }
+
+      return assetsWithChange;
+    } catch (error) {
+      console.error(
+        "(getUserAssetsWithChange - portfolioService BackEnd): Erro ao obter ativos do usuário com variação de preço:",
+        error.message
+      );
+      throw new Error(
+        "(getUserAssetsWithChange - portfolioService BackEnd): Erro ao obter ativos do usuário com variação de preço"
       );
     }
   }
