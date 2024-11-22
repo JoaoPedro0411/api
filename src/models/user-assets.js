@@ -7,9 +7,8 @@ class UserAssets extends Model {}
 UserAssets.init(
   {
     assetId: {
-      type: DataTypes.STRING,
+      type: DataTypes.INTEGER,
       autoIncrement: true,
-      allowNull: false,
       field: "asset_id",
       primaryKey: true,
     },
