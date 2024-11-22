@@ -37,21 +37,21 @@ UserAssets.init(
       defaultValue: 0,
       field: "average_asset_price",
     },
-    // assetName: {
-    //   type: DataTypes.STRING,
-    //   allowNull: false,
-    //   field: "asset_name",
-    // },
+    assetName: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      field: "asset_name",
+    },
     assetType: {
       type: DataTypes.ENUM("stock", "fund"),
       allowNull: false,
       field: "asset_type",
     },
-    // assetLogoUrl: {
-    //   type: DataTypes.STRING,
-    //   allowNull: true,
-    //   field: "asset_logo_url",
-    // },
+    assetLogoUrl: {
+      type: DataTypes.STRING,
+      allowNull: true,
+      field: "asset_logo_url",
+    },
     assetTotalQuantity: {
       type: DataTypes.INTEGER,
       allowNull: false,

@@ -57,6 +57,7 @@ passport.use(
             userId: profile.id,
             userName: profile.username,
             userEmail: userEmail,
+            userBalance: 0 
           });
         }
         return done(null, user);
