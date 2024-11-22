@@ -8,6 +8,7 @@ UserAssets.init(
   {
     assetId: {
       type: DataTypes.STRING,
+      autoIncrement: true,
       allowNull: false,
       field: "asset_id",
       primaryKey: true,
