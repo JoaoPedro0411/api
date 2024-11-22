@@ -1,26 +1,23 @@
+const { sequelize } = require("../config/db-config");
 const UserAssets = require("../models/user-assets");
 const Transaction = require("../models/transaction");
-const brapiService = require("./brapiService");
 const User = require("../models/user");
+const brapiService = require("./brapiService");
 
 class PortfolioService {
-  async buyStock(userId, ticker, quantity, assetName, type, logoUrl, price) {
+  async buyStock(userId, ticker, quantity, price, assetName, type, logoUrl) {
     const transaction = await sequelize.transaction();
     try {
       const user = await User.findByPk(userId);
       if (!user) {
-        throw new Error(
-          "(buyStock - PortfolioService): Usuário não encontrado"
-        );
+        throw new Error("(buyStock - PortfolioService): Usuário não encontrado");
       }
 
       const totalCost = price * quantity;
 
       if (user.userBalance < totalCost) {
         throw new Error(
-          `(buyStock - PortfolioService): Saldo insuficiente. Saldo atual: R$${user.userBalance.toFixed(
-            2
-          )}, custo da compra: R$${totalCost.toFixed(2)}`
+          `(buyStock - PortfolioService): Saldo insuficiente. Saldo atual: ${user.userBalance}, custo da compra: ${totalCost}`
         );
       }
 
@@ -50,7 +47,7 @@ class PortfolioService {
             assetTotalQuantity: quantity,
             averageAssetPrice: price,
             assetPrice: price,
-            assetName: assetName,
+            assetName,
             assetType: type,
             assetLogoUrl: logoUrl,
           },
@@ -84,7 +81,7 @@ class PortfolioService {
         `(buyStock - PortfolioService): Erro ao comprar ações: ${error.message}`
       );
       throw new Error(
-        `(buyStock - PortfolioService): Erro ao processar compra de ações`
+        "(buyStock - PortfolioService): Erro ao processar compra de ações"
       );
     }
   }
@@ -92,14 +89,14 @@ class PortfolioService {
   async sellStock(userId, ticker, quantityToSell, price) {
     const transaction = await sequelize.transaction();
     try {
-      let remainingQuantity = quantityToSell;
       const user = await User.findByPk(userId);
       if (!user) {
-        throw new Error(
-          "(sellStock - PortfolioService): Usuário não encontrado"
-        );
+        throw new Error("(sellStock - PortfolioService): Usuário não encontrado");
       }
 
+      const totalEarnings = price * quantityToSell;
+
+      let remainingQuantity = quantityToSell;
       const transactions = await Transaction.findAll({
         where: {
           userId,
@@ -110,24 +107,19 @@ class PortfolioService {
         order: [["transactionDate", "ASC"]],
       });
 
-      let totalEarnings = 0;
-
-      for (const transaction of transactions) {
+      for (const trans of transactions) {
         if (remainingQuantity <= 0) break;
 
-        const lotQuantity = transaction.transactionAssetQuantity;
+        const lotQuantity = trans.transactionAssetQuantity;
         const quantityToDeduct = Math.min(remainingQuantity, lotQuantity);
 
-        totalEarnings += quantityToDeduct * price;
         remainingQuantity -= quantityToDeduct;
 
         if (quantityToDeduct === lotQuantity) {
-          await transaction.update({ isActive: false }, { transaction });
+          await trans.update({ isActive: false }, { transaction });
         } else {
-          await transaction.update(
-            {
-              transactionAssetQuantity: lotQuantity - quantityToDeduct,
-            },
+          await trans.update(
+            { transactionAssetQuantity: lotQuantity - quantityToDeduct },
             { transaction }
           );
         }
@@ -138,6 +130,7 @@ class PortfolioService {
           `(sellStock - PortfolioService): Quantidade insuficiente para venda. Restante: ${remainingQuantity}`
         );
       }
+
       const asset = await UserAssets.findOne({
         where: { userId, assetTicker: ticker },
       });
@@ -151,6 +144,7 @@ class PortfolioService {
           { transaction }
         );
       }
+
       await user.update(
         { userBalance: user.userBalance + totalEarnings },
         { transaction }
@@ -164,10 +158,27 @@ class PortfolioService {
         `(sellStock - PortfolioService): Erro ao vender ações: ${error.message}`
       );
       throw new Error(
-        `(sellStock - PortfolioService): Erro ao processar venda de ações`
+        "(sellStock - PortfolioService): Erro ao processar venda de ações"
       );
     }
   }
+
+  async getTransactionHistory(userId) {
+    try {
+      return await Transaction.findAll({
+        where: { userId },
+        order: [["transactionDate", "DESC"]],
+      });
+    } catch (error) {
+      console.error(
+        `(getTransactionHistory - PortfolioService): Erro: ${error.message}`
+      );
+      throw new Error(
+        "(getTransactionHistory - PortfolioService): Erro ao obter histórico de transações"
+      );
+    }
+  }
+
   async calculateReturn(userId) {
     try {
       const assets = await UserAssets.findAll({ where: { userId } });
@@ -190,26 +201,23 @@ class PortfolioService {
       return { totalInvested, totalValue, returnPercentage };
     } catch (error) {
       console.error(
-        " (calculateReturn - portfolioService BackEnd): Erro ao calcular rentabilidade:",
-        error.message
+        `(calculateReturn - PortfolioService): Erro: ${error.message}`
       );
       throw new Error(
-        "(calculateReturn - portfolioService BackEnd): Erro ao calcular rentabilidade"
+        "(calculateReturn - PortfolioService): Erro ao calcular rentabilidade"
       );
     }
   }
 
   async getDetailedAssets(type, limit) {
     try {
-      const assets = await brapiService.getAssetsWithChange(type, limit);
-      return assets;
+      return await brapiService.getAssetsWithChange(type, limit);
     } catch (error) {
       console.error(
-        "(getDetailedAssets - portfolioService BackEnd): Erro ao obter ativos detalhados:",
-        error.message
+        `(getDetailedAssets - PortfolioService): Erro: ${error.message}`
       );
       throw new Error(
-        "(getDetailedAssets - portfolioService BackEnd): Erro ao obter ativos detalhados"
+        "(getDetailedAssets - PortfolioService): Erro ao obter ativos detalhados"
       );
     }
   }
@@ -218,53 +226,50 @@ class PortfolioService {
     try {
       const userAssets = await UserAssets.findAll({ where: { userId } });
 
-      if (userAssets.length === 0) {
+      if (!userAssets.length) {
         throw new Error(
-          "(getUserAssetsWithChange - portfolioService BackEnd): O usuário não possui ativos."
+          "(getUserAssetsWithChange - PortfolioService): O usuário não possui ativos"
         );
       }
 
       const assetsWithChange = [];
 
       for (const asset of userAssets) {
-        const ticker = asset.assetTicker;
-
-        const assetDetails = await brapiService.getAsset(ticker);
+        const assetDetails = await brapiService.getAsset(asset.assetTicker);
 
         if (!assetDetails) {
           console.error(
-            `(getUserAssetsWithChange - portfolioService BackEnd): Dados não encontrados para o ativo ${ticker}`
+            `(getUserAssetsWithChange - PortfolioService): Dados ausentes para ${asset.assetTicker}`
           );
           continue;
         }
-        const currentPrice = assetDetails.regularMarketPrice;
-        const previousClose = assetDetails.regularMarketPreviousClose;
-        const priceChangePercent =
-          ((currentPrice - previousClose) / previousClose) * 100;
 
-        const assetData = {
-          ticker,
+        const priceChangePercent =
+          ((assetDetails.regularMarketPrice -
+            assetDetails.regularMarketPreviousClose) /
+            assetDetails.regularMarketPreviousClose) *
+          100;
+
+        assetsWithChange.push({
+          ticker: asset.assetTicker,
           shortName: assetDetails.shortName,
           longName: assetDetails.longName,
-          currentPrice,
-          previousClose,
+          currentPrice: assetDetails.regularMarketPrice,
+          previousClose: assetDetails.regularMarketPreviousClose,
           priceChangePercent: priceChangePercent.toFixed(2),
           logoUrl: assetDetails.logoUrl,
           quantity: asset.assetTotalQuantity,
           averagePrice: asset.averageAssetPrice,
-        };
-
-        assetsWithChange.push(assetData);
+        });
       }
 
       return assetsWithChange;
     } catch (error) {
       console.error(
-        "(getUserAssetsWithChange - portfolioService BackEnd): Erro ao obter ativos do usuário com variação de preço:",
-        error.message
+        `(getUserAssetsWithChange - PortfolioService): Erro: ${error.message}`
       );
       throw new Error(
-        "(getUserAssetsWithChange - portfolioService BackEnd): Erro ao obter ativos do usuário com variação de preço"
+        "(getUserAssetsWithChange - PortfolioService): Erro ao obter ativos do usuário com variação de preço"
       );
     }
   }
