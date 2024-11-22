@@ -3,10 +3,10 @@ const PortfolioService = require("../services/portfolioService");
 class PortfolioController {
   async buyStock(req, res) {
     const { userId } = req.user;
-    const { ticker, quantity, price } = req.body;
+    const { ticker, quantity, price, assetName, type, logoUrl} = req.body;
 
     try {
-      const asset = await PortfolioService.buyStock(userId, ticker, quantity, price);
+      const asset = await PortfolioService.buyStock(userId, ticker, quantity, price, assetName, type, logoUrl);
       return res.status(200).json({
         message: "Ações compradas com sucesso",
         asset,
@@ -19,10 +19,10 @@ class PortfolioController {
 
   async sellStock(req, res) {
     const { userId } = req.user;
-    const { ticker, quantity, price } = req.body;
+    const { ticker, quantity, price, assetName, type, logoUrl} = req.body;
 
     try {
-      const totalCost = await PortfolioService.sellStock(userId, ticker, quantity, price);
+      const totalCost = await PortfolioService.sellStock(userId, ticker, quantity, price, assetName, type, logoUrl);
       return res.status(200).json({
         message: "Ações vendidas com sucesso",
         totalCost,

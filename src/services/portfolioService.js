@@ -47,7 +47,7 @@ class PortfolioService {
             assetTotalQuantity: quantity,
             averageAssetPrice: price,
             assetPrice: price,
-            assetName,
+            assetName:assetName,
             assetType: type,
             assetLogoUrl: logoUrl,
           },
