@@ -5,6 +5,7 @@ const User = require("../models/user");
 const brapiService = require("./brapiService");
 
 class PortfolioService {
+  
   async buyStock(userId, ticker, quantity, price, assetName, type, logoUrl) {
     const transaction = await sequelize.transaction();
     try {
@@ -245,7 +246,7 @@ class PortfolioService {
         }
 
         const priceChangePercent =
-          ((assetDetails.regularMarketPrice -
+          ((asset.averageAssetPrice -
             assetDetails.regularMarketPreviousClose) /
             assetDetails.regularMarketPreviousClose) *
           100;

@@ -5,7 +5,6 @@ class PortfolioController {
     const { userId } = req.user;
     const { ticker, quantity, price, assetName, type, logoUrl} = req.body;
     console.log("Dados recebidos no backend para compra:", req.body);
-
     try {
       const asset = await PortfolioService.buyStock(userId, ticker, quantity, price, assetName, type, logoUrl);
       return res.status(200).json({
