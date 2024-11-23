@@ -252,7 +252,7 @@ class PortfolioService {
           100;
 
         assetsWithChange.push({
-          ticker: asset.assetTicker,
+          symbol: asset.assetTicker,
           shortName: assetDetails.shortName,
           longName: assetDetails.longName,
           currentPrice: assetDetails.regularMarketPrice,
@@ -261,6 +261,7 @@ class PortfolioService {
           logoUrl: assetDetails.logoUrl,
           quantity: asset.assetTotalQuantity,
           averagePrice: asset.averageAssetPrice,
+          type: asset.assetType
         });
       }
 

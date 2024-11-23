@@ -33,17 +33,17 @@ class PortfolioController {
     }
   }
 
-  async getPortfolio(req, res) {
-    const { userId } = req.user;
+  // async getPortfolio(req, res) {
+  //   const { userId } = req.user;
 
-    try {
-      const portfolio = await PortfolioService.getUserAssetsWithChange(userId);
-      return res.status(200).json(portfolio);
-    } catch (error) {
-      console.error("(getPortfolio - portfolioController BackEnd): Erro ao obter portfólio:", error.message);
-      return res.status(500).json({ error: "Erro ao obter portfólio" });
-    }
-  }
+  //   try {
+  //     const portfolio = await PortfolioService.getUserAssetsWithChange(userId);
+  //     return res.status(200).json(portfolio);
+  //   } catch (error) {
+  //     console.error("(getPortfolio - portfolioController BackEnd): Erro ao obter portfólio:", error.message);
+  //     return res.status(500).json({ error: "Erro ao obter portfólio" });
+  //   }
+  // }
 
   async getTransactionHistory(req, res) {
     const { userId } = req.user;
