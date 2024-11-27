@@ -174,9 +174,16 @@ class PortfolioService {
 
   async getTransactionHistory(userId) {
     try {
-      return await Transaction.findAll({
+      const transactions = await Transaction.findAll({
         where: { userId },
         order: [["transactionDate", "DESC"]],
+      });
+  
+      return transactions.map((transaction) => {
+        return {
+          ...transaction.dataValues,
+          transactionCost: parseFloat(transaction.transactionCost), 
+        };
       });
     } catch (error) {
       console.error(
@@ -187,6 +194,7 @@ class PortfolioService {
       );
     }
   }
+  
 
   async calculateReturn(userId) {
     try {
