@@ -229,9 +229,8 @@ class PortfolioService {
       const userAssets = await UserAssets.findAll({ where: { userId } });
 
       if (!userAssets.length) {
-        throw new Error(
-          "(getUserAssetsWithChange - PortfolioService): O usuário não possui ativos"
-        );
+        console.warn("(getUserAssetsWithChange - PortfolioService): O usuário não possui ativos.");
+        return [];
       }
 
       const assetsWithChange = [];
