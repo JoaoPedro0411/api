@@ -89,7 +89,7 @@ class UserService {
       if (!user) {
         throw new Error("Usuário não encontrado");
       }
-      const newBalance = user.userBalance + amount;
+      const newBalance = Number(user.userBalance) + Number(amount); 
       await user.update({ userBalance: newBalance });
       return { userId, newBalance };
     } catch (error) {
@@ -97,17 +97,17 @@ class UserService {
       throw error;
     }
   }
-
+  
   async withdraw(userId, amount) {
     try {
       const user = await User.findByPk(userId);
       if (!user) {
         throw new Error("Usuário não encontrado");
       }
-      if (user.userBalance < amount) {
+      if (Number(user.userBalance) < Number(amount)) {
         throw new Error("Saldo insuficiente");
       }
-      const newBalance = user.userBalance - amount;
+      const newBalance = Number(user.userBalance) - Number(amount); 
       await user.update({ userBalance: newBalance });
       return { userId, newBalance };
     } catch (error) {

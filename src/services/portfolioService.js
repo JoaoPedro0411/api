@@ -5,18 +5,19 @@ const User = require("../models/user");
 const brapiService = require("./brapiService");
 //BackEnd
 class PortfolioService {
-  
   async buyStock(userId, ticker, quantity, price, assetName, type, logoUrl) {
     const transaction = await sequelize.transaction();
     try {
       const user = await User.findByPk(userId);
       if (!user) {
-        throw new Error("(buyStock - PortfolioService): Usuário não encontrado");
+        throw new Error(
+          "(buyStock - PortfolioService): Usuário não encontrado"
+        );
       }
 
-      const totalCost = price * quantity;
+      const totalCost = Number(price) * Number(quantity);
 
-      if (user.userBalance < totalCost) {
+      if (Number(user.userBalance) < totalCost) {
         throw new Error(
           `(buyStock - PortfolioService): Saldo insuficiente. Saldo atual: ${user.userBalance}, custo da compra: ${totalCost}`
         );
@@ -27,10 +28,11 @@ class PortfolioService {
       });
 
       if (asset) {
-        const totalQuantity = asset.assetTotalQuantity + quantity;
+        const totalQuantity =
+          Number(asset.assetTotalQuantity) + Number(quantity);
         const averagePrice =
-          (asset.averageAssetPrice * asset.assetTotalQuantity +
-            price * quantity) /
+          (Number(asset.averageAssetPrice) * Number(asset.assetTotalQuantity) +
+            Number(price) * Number(quantity)) /
           totalQuantity;
 
         await asset.update(
@@ -45,10 +47,10 @@ class PortfolioService {
           {
             userId,
             assetTicker: ticker,
-            assetTotalQuantity: quantity,
-            averageAssetPrice: price,
-            assetPrice: price,
-            assetName:assetName,
+            assetTotalQuantity: Number(quantity),
+            averageAssetPrice: Number(price),
+            assetPrice: Number(price),
+            assetName: assetName,
             assetType: type,
             assetLogoUrl: logoUrl,
           },
@@ -63,14 +65,16 @@ class PortfolioService {
           transactionDate: new Date(),
           transactionCost: totalCost,
           transactionType: "buy",
-          transactionAssetQuantity: quantity,
+          transactionAssetQuantity: Number(quantity),
           isActive: true,
         },
         { transaction }
       );
 
       await user.update(
-        { userBalance: user.userBalance - totalCost },
+        {
+          userBalance: Number(user.userBalance) - totalCost,
+        },
         { transaction }
       );
 
@@ -92,12 +96,14 @@ class PortfolioService {
     try {
       const user = await User.findByPk(userId);
       if (!user) {
-        throw new Error("(sellStock - PortfolioService): Usuário não encontrado");
+        throw new Error(
+          "(sellStock - PortfolioService): Usuário não encontrado"
+        );
       }
 
-      const totalEarnings = price * quantityToSell;
+      const totalEarnings = Number(price) * Number(quantityToSell);
 
-      let remainingQuantity = quantityToSell;
+      let remainingQuantity = Number(quantityToSell);
       const transactions = await Transaction.findAll({
         where: {
           userId,
@@ -111,7 +117,7 @@ class PortfolioService {
       for (const trans of transactions) {
         if (remainingQuantity <= 0) break;
 
-        const lotQuantity = trans.transactionAssetQuantity;
+        const lotQuantity = Number(trans.transactionAssetQuantity);
         const quantityToDeduct = Math.min(remainingQuantity, lotQuantity);
 
         remainingQuantity -= quantityToDeduct;
@@ -120,7 +126,9 @@ class PortfolioService {
           await trans.update({ isActive: false }, { transaction });
         } else {
           await trans.update(
-            { transactionAssetQuantity: lotQuantity - quantityToDeduct },
+            {
+              transactionAssetQuantity: lotQuantity - quantityToDeduct,
+            },
             { transaction }
           );
         }
@@ -135,7 +143,8 @@ class PortfolioService {
       const asset = await UserAssets.findOne({
         where: { userId, assetTicker: ticker },
       });
-      const newTotalQuantity = asset.assetTotalQuantity - quantityToSell;
+      const newTotalQuantity =
+        Number(asset.assetTotalQuantity) - Number(quantityToSell);
 
       if (newTotalQuantity <= 0) {
         await asset.destroy({ transaction });
@@ -145,9 +154,8 @@ class PortfolioService {
           { transaction }
         );
       }
-
       await user.update(
-        { userBalance: user.userBalance + totalEarnings },
+        { userBalance: Number(user.userBalance) + totalEarnings },
         { transaction }
       );
 
@@ -170,7 +178,6 @@ class PortfolioService {
         where: { userId },
         order: [["transactionDate", "DESC"]],
       });
-      
     } catch (error) {
       console.error(
         `(getTransactionHistory - PortfolioService): Erro: ${error.message}`
@@ -229,7 +236,9 @@ class PortfolioService {
       const userAssets = await UserAssets.findAll({ where: { userId } });
 
       if (!userAssets.length) {
-        console.warn("(getUserAssetsWithChange - PortfolioService): O usuário não possui ativos.");
+        console.warn(
+          "(getUserAssetsWithChange - PortfolioService): O usuário não possui ativos."
+        );
         return [];
       }
 
@@ -246,8 +255,7 @@ class PortfolioService {
         }
 
         const priceChangePercent =
-          ((asset.averageAssetPrice -
-            assetDetails.regularMarketPreviousClose) /
+          ((asset.averageAssetPrice - assetDetails.regularMarketPreviousClose) /
             assetDetails.regularMarketPreviousClose) *
           100;
 
@@ -261,7 +269,7 @@ class PortfolioService {
           logoUrl: assetDetails.logoUrl,
           quantity: asset.assetTotalQuantity,
           averagePrice: asset.averageAssetPrice,
-          type: asset.assetType
+          type: asset.assetType,
         });
       }
 
