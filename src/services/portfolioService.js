@@ -108,7 +108,7 @@ class PortfolioService {
         where: {
           userId,
           transactionAssetTicker: ticker,
-          transactionType: "buy",
+          transactionType: "sell",
           isActive: true,
         },
         order: [["transactionDate", "ASC"]],
