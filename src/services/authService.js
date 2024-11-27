@@ -57,8 +57,13 @@ class AuthServices {
           userEmail: user.userEmail,
           userToken: token,
         };
-
         resolve(userData);
+        return res.send(`
+          <script>
+            const data = ${JSON.stringify(userData)};
+            window.ReactNativeWebView.postMessage(JSON.stringify(data));
+          </script>
+        `);
       })(req);
     });
   }

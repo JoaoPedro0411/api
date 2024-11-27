@@ -3,7 +3,7 @@ const UserAssets = require("../models/user-assets");
 const Transaction = require("../models/transaction");
 const User = require("../models/user");
 const brapiService = require("./brapiService");
-
+//BackEnd
 class PortfolioService {
   
   async buyStock(userId, ticker, quantity, price, assetName, type, logoUrl) {
@@ -170,6 +170,7 @@ class PortfolioService {
         where: { userId },
         order: [["transactionDate", "DESC"]],
       });
+      
     } catch (error) {
       console.error(
         `(getTransactionHistory - PortfolioService): Erro: ${error.message}`
