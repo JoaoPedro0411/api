@@ -94,97 +94,97 @@ class PortfolioService {
   async sellStock(userId, ticker, quantityToSell, price) {
     const transaction = await sequelize.transaction();
     try {
-        const user = await User.findByPk(userId);
-        if (!user) {
-            throw new Error("(sellStock - PortfolioService): Usuário não encontrado");
-        }
-
-        const totalEarnings = Number(price) * Number(quantityToSell);
-
-        let remainingQuantity = Number(quantityToSell);
-        const transactions = await Transaction.findAll({
-            where: {
-                userId,
-                transactionAssetTicker: ticker,
-                transactionType: "buy",
-                isActive: true,
-            },
-            order: [["transactionDate", "ASC"]],
-        });
-
-        for (const trans of transactions) {
-            if (remainingQuantity <= 0) break;
-
-            const lotQuantity = Number(trans.transactionAssetQuantity);
-            const quantityToDeduct = Math.min(remainingQuantity, lotQuantity);
-
-            remainingQuantity -= quantityToDeduct;
-
-            if (quantityToDeduct === lotQuantity) {
-                await trans.update({ isActive: false }, { transaction });
-            } else {
-                await trans.update(
-                    {
-                        transactionAssetQuantity: lotQuantity - quantityToDeduct,
-                    },
-                    { transaction }
-                );
-            }
-        }
-
-        if (remainingQuantity > 0) {
-            throw new Error(
-                `(sellStock - PortfolioService): Quantidade insuficiente para venda. Restante: ${remainingQuantity}`
-            );
-        }
-
-        const asset = await UserAssets.findOne({
-            where: { userId, assetTicker: ticker },
-        });
-        const newTotalQuantity =
-            Number(asset.assetTotalQuantity) - Number(quantityToSell);
-
-        if (newTotalQuantity <= 0) {
-            await asset.destroy({ transaction });
-        } else {
-            await asset.update(
-                { assetTotalQuantity: newTotalQuantity },
-                { transaction }
-            );
-        }
-
-        await Transaction.create(
-            {
-                userId,
-                transactionAssetTicker: ticker,
-                transactionDate: new Date(),
-                transactionCost: totalEarnings,
-                transactionType: "sell",
-                transactionAssetQuantity: Number(quantityToSell),
-                isActive: true,
-            },
-            { transaction }
-        );
-
-
-        await user.update(
-            { userBalance: Number(user.userBalance) + totalEarnings },
-            { transaction }
-        );
-
-        await transaction.commit();
-        return totalEarnings;
-    } catch (error) {
-        await transaction.rollback();
-        console.error(
-            `(sellStock - PortfolioService): Erro ao vender ações: ${error.message}`
-        );
+      const user = await User.findByPk(userId);
+      if (!user) {
         throw new Error(
-            "(sellStock - PortfolioService): Erro ao processar venda de ações"
+          "(sellStock - PortfolioService): Usuário não encontrado"
         );
-    }
-}
+      }
 
+      const totalEarnings = Number(price) * Number(quantityToSell);
+
+      let remainingQuantity = Number(quantityToSell);
+      const transactions = await Transaction.findAll({
+        where: {
+          userId,
+          transactionAssetTicker: ticker,
+          transactionType: "buy",
+          isActive: true,
+        },
+        order: [["transactionDate", "ASC"]],
+      });
+
+      for (const trans of transactions) {
+        if (remainingQuantity <= 0) break;
+
+        const lotQuantity = Number(trans.transactionAssetQuantity);
+        const quantityToDeduct = Math.min(remainingQuantity, lotQuantity);
+
+        remainingQuantity -= quantityToDeduct;
+
+        if (quantityToDeduct === lotQuantity) {
+          await trans.update({ isActive: false }, { transaction });
+        } else {
+          await trans.update(
+            {
+              transactionAssetQuantity: lotQuantity - quantityToDeduct,
+            },
+            { transaction }
+          );
+        }
+      }
+
+      if (remainingQuantity > 0) {
+        throw new Error(
+          `(sellStock - PortfolioService): Quantidade insuficiente para venda. Restante: ${remainingQuantity}`
+        );
+      }
+
+      const asset = await UserAssets.findOne({
+        where: { userId, assetTicker: ticker },
+      });
+      const newTotalQuantity =
+        Number(asset.assetTotalQuantity) - Number(quantityToSell);
+
+      if (newTotalQuantity <= 0) {
+        await asset.destroy({ transaction });
+      } else {
+        await asset.update(
+          { assetTotalQuantity: newTotalQuantity },
+          { transaction }
+        );
+      }
+
+      await Transaction.create(
+        {
+          userId,
+          transactionAssetTicker: ticker,
+          transactionDate: new Date(),
+          transactionCost: totalEarnings,
+          transactionType: "sell",
+          transactionAssetQuantity: Number(quantityToSell),
+          isActive: true,
+        },
+        { transaction }
+      );
+
+      await user.update(
+        { userBalance: Number(user.userBalance) + totalEarnings },
+        { transaction }
+      );
+
+      await transaction.commit();
+      return totalEarnings;
+    } catch (error) {
+      await transaction.rollback();
+      console.error(
+        `(sellStock - PortfolioService): Erro ao vender ações: ${error.message}`
+      );
+      throw new Error(
+        "(sellStock - PortfolioService): Erro ao processar venda de ações"
+      );
+    }
+  }
 
   async getTransactionHistory(userId) {
     try {
@@ -192,11 +192,11 @@ class PortfolioService {
         where: { userId },
         order: [["transactionDate", "DESC"]],
       });
-  
+
       return transactions.map((transaction) => {
         return {
           ...transaction.dataValues,
-          transactionCost: parseFloat(transaction.transactionCost), 
+          transactionCost: parseFloat(transaction.transactionCost),
         };
       });
     } catch (error) {
@@ -208,7 +208,6 @@ class PortfolioService {
       );
     }
   }
-  
 
   async calculateReturn(userId) {
     try {
@@ -218,18 +217,31 @@ class PortfolioService {
       let totalValue = 0;
 
       for (const asset of assets) {
-        const currentPriceData = await brapiService.getAsset(asset.assetTicker);
-        const currentPrice = currentPriceData.regularMarketPrice;
-        const value = currentPrice * asset.assetTotalQuantity;
-        const invested = asset.averageAssetPrice * asset.assetTotalQuantity;
+        const assetTicker = asset.assetTicker;
+        const assetTotalQuantity = Number(asset.assetTotalQuantity) || 0;
+        const averageAssetPrice = Number(asset.averageAssetPrice) || 0;
+
+        const currentPriceData = await brapiService.getAsset(assetTicker);
+
+        const currentPrice = Number(currentPriceData.regularMarketPrice) || 0;
+
+        const value = currentPrice * assetTotalQuantity;
+        const invested = averageAssetPrice * assetTotalQuantity;
 
         totalInvested += invested;
         totalValue += value;
       }
 
       const returnPercentage =
-        ((totalValue - totalInvested) / totalInvested) * 100;
-      return { totalInvested, totalValue, returnPercentage };
+        totalInvested > 0
+          ? ((totalValue - totalInvested) / totalInvested) * 100
+          : 0;
+
+      return {
+        totalInvested: totalInvested.toFixed(2),
+        totalValue: totalValue.toFixed(2),
+        returnPercentage: returnPercentage.toFixed(2),
+      };
     } catch (error) {
       console.error(
         `(calculateReturn - PortfolioService): Erro: ${error.message}`
